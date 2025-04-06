@@ -1,28 +1,41 @@
 import { StyleSheet, Text, View, Button } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { Component } from "react";
 import { CameraView, Camera } from "expo-camera";
 
-const BarcodeScan = () => {
-    const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-    const [scanner, setScanner] = useState<boolean>(false);
-    const [text, setText] = useState<string>("Not Yet Scanned");
+interface BarcodeScanState {
+    hasPermission: boolean | null;
+    scanner: boolean;
+    text: string;
+}
 
-    const askForCameraPermission = async () => {
+class BarcodeScan extends Component<{}, BarcodeScanState> {
+    constructor(props: {}) {
+        super(props);
+        this.state = {
+            hasPermission: null,
+            scanner: false,
+            text: "Not Yet Scanned"
+        };
+    }
+
+    componentDidMount() {
+        this.askForCameraPermission();
+    }
+
+    askForCameraPermission = async () => {
         const { status } = await Camera.requestCameraPermissionsAsync();
-        setHasPermission(status === "granted");
+        this.setState({ hasPermission: status === "granted" });
     };
 
-    useEffect(() => {
-        askForCameraPermission();
-    }, []);
-
-    const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
-        setScanner(true);
-        setText(`Type: ${type}\nData: ${data}`);
+    handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
+        this.setState({
+            scanner: true,
+            text: `Type: ${type}\nData: ${data}`
+        });
         console.log(`Type: ${type}\nData: ${data}`);
     };
 
-    if (hasPermission === null) {
+    renderPermissionRequestView() {
         return (
             <View style={styles.container}>
                 <Text>Requesting for Camera Permission</Text>
@@ -30,37 +43,59 @@ const BarcodeScan = () => {
         );
     }
 
-    if (hasPermission === false) {
+    renderPermissionDeniedView() {
         return (
             <View style={styles.container}>
                 <Text style={{ margin: 10 }}>No access to camera</Text>
-                <Button title="Allow Camera" onPress={askForCameraPermission} />
+                <Button title="Allow Camera" onPress={this.askForCameraPermission} />
             </View>
         );
     }
 
-    return (
-        <View style={styles.container}>
-            <View style={styles.barcodeBox}>
-                <CameraView
-                    barcodeScannerSettings={{
-                        barcodeTypes: [
-                            "qr", "ean13", "ean8", "upc_a", "upc_e",
-                            "code128", "code39", "code93", "itf14",
-                            "codabar", "pdf417", "aztec", "datamatrix"
-                        ]
-                    }}
-                    onBarcodeScanned={scanner ? undefined : handleBarCodeScanned}
-                    style={{ height: 400, width: 400 }}
-                />
+    renderScannerView() {
+        const { scanner, text } = this.state;
+
+        return (
+            <View style={styles.container}>
+                <View style={styles.barcodeBox}>
+                    <CameraView
+                        barcodeScannerSettings={{
+                            barcodeTypes: [
+                                "qr", "ean13", "ean8", "upc_a", "upc_e",
+                                "code128", "code39", "code93", "itf14",
+                                "codabar", "pdf417", "aztec", "datamatrix"
+                            ]
+                        }}
+                        onBarcodeScanned={scanner ? undefined : this.handleBarCodeScanned}
+                        style={{ height: 400, width: 400 }}
+                    />
+                </View>
+                <Text style={styles.mainText}>{text}</Text>
+                {scanner && (
+                    <Button 
+                        title="Scan Again?" 
+                        onPress={() => this.setState({ scanner: false })} 
+                        color="tomato" 
+                    />
+                )}
             </View>
-            <Text style={styles.mainText}>{text}</Text>
-            {scanner && (
-                <Button title="Scan Again?" onPress={() => setScanner(false)} color="tomato" />
-            )}
-        </View>
-    );
-};
+        );
+    }
+
+    render() {
+        const { hasPermission } = this.state;
+
+        if (hasPermission === null) {
+            return this.renderPermissionRequestView();
+        }
+
+        if (hasPermission === false) {
+            return this.renderPermissionDeniedView();
+        }
+
+        return this.renderScannerView();
+    }
+}
 
 const styles = StyleSheet.create({
     container: {
