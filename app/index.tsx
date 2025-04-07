@@ -1,6 +1,8 @@
 import { Text, View } from "react-native";
 import BarcodeScan from "../components/barcodeScan"
 import AiClassifier from "../components/AI_Classifier";
+import Register from "../components/Register";
+import Login from "../components/Login";
 export default function Index() {
   return (
     /*<View
@@ -12,7 +14,9 @@ export default function Index() {
     >
       <Text>Edit app/index.tsx to edit this screen.</Text>
     </View>*/
-     <AiClassifier />
+     //<AiClassifier />
     // <BarcodeScan/>
+    //<Register />
+    <Login />
   );
 }
