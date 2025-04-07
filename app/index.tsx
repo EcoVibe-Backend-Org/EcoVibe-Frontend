@@ -1,13 +1,14 @@
 import { Text, View } from "react-native";
-import BarcodeScan from "./barcodeScan";
-import AiClassifier from "./AI_Classifier";
-import AuthHeader from "./Authentication/authHeader";
+import Register from "./(auth)/register";
+import Login from "./(auth)/login";
+import Home from "./(tabs)/home";
+import { Redirect } from 'expo-router';
+
+const isLoggedIn = false;
 
 
 export default function Index() {
-  return (
-    <View>
-        <Text>Welcome</Text>
-    </View>
-  );
+  return <Redirect href={isLoggedIn ? "./(tabs)/home" : "./(auth)/login"} />;
 }
+
+
