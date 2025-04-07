@@ -81,7 +81,7 @@ class AiClassifier extends Component<{}, AiClassifierState> {
     this.cleanUpSSE();
 
     try {
-      this.sseInstance = new SSE('http://10.40.49.182:3000/analyze-image', {
+      this.sseInstance = new SSE('https://ecovibe-backend.up.railway.app/analyze-image', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
