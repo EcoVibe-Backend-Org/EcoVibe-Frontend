@@ -4,7 +4,7 @@ import Login from "./(auth)/login";
 import Home from "./(tabs)/home";
 import { Redirect } from 'expo-router';
 
-const isLoggedIn = true;
+const isLoggedIn = false;
 
 
 export default function Index() {

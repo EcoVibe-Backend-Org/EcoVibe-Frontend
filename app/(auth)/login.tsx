@@ -1,41 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  View,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
+  View,
+  Switch,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
+import GoogleLogo from '../../assets/google.png';
+import AppleLogo from '../../assets/apple.png';
+import { Link } from 'expo-router'; // Import the Link component from expo-router
+import { SafeAreaView } from 'react-native-safe-area-context'; // Import SafeAreaView
 
-interface LoginProps {}
-
-const Login: React.FC<LoginProps> = () => {
+const Login: React.FC = () => {
   const navigation = useNavigation();
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ username: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  // Disable the header
+  useEffect(() => {
+    navigation.setOptions({
+      headerShown: false, // Hide the header on this screen
+    });
+  }, [navigation]);
 
   const validateForm = () => {
     let tempErrors: Record<string, string> = {};
     let isValid = true;
 
-    // Username validation
     if (!formData.username.trim()) {
       tempErrors.username = 'Username is required';
       isValid = false;
     }
-
-    // Password validation
     if (!formData.password) {
       tempErrors.password = 'Password is required';
       isValid = false;
@@ -53,13 +58,8 @@ const Login: React.FC<LoginProps> = () => {
     if (validateForm()) {
       setIsLoading(true);
       try {
-        const response = await axios.post('https://ecovibe-backend.up.railway.app/api/users/login', {
-          username: formData.username,
-          password: formData.password,
-        });
-
-        // Still need to store token
-        console.log("success")
+        const response = await axios.post('https://ecovibe-backend.up.railway.app/api/users/login', formData);
+        console.log('success');
         navigation.navigate('Home' as never);
       } catch (error: any) {
         const errorMessage = error.response?.data || 'Login failed. Please check your credentials.';
@@ -70,167 +70,112 @@ const Login: React.FC<LoginProps> = () => {
     }
   };
 
-  const navigateToRegister = () => {
-    navigation.navigate('Register' as never);
-  };
-
-  const navigateToForgotPassword = () => {
-    navigation.navigate('ForgotPassword' as never);
-  };
-
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.keyboardAvoidingView}
-    >
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.formContainer}>
-          <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Sign in to your account</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}> {/* Wrap with SafeAreaView and set background to white */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
+      >
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="p-6">
+          <View className="items-center mt-6 mb-8">
+            <View className="bg-green-100 p-4 rounded-full mb-3">
+              <Text className="text-2xl">♻️</Text>
+            </View>
+            <Text className="text-xl font-semibold text-gray-900">Welcome to EcoVibe</Text>
+            <Text className="mt-1 text-gray-500">Recycle Smarter, Live Better!</Text>
+          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Username</Text>
+          <View className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <Text className="text-gray-700 mb-1">Username</Text>
             <TextInput
-              style={styles.input}
               placeholder="Enter your username"
               autoCapitalize="none"
               value={formData.username}
               onChangeText={(text) => handleChange('username', text)}
+              className="border border-gray-300 rounded-md px-4 py-2 mb-4 bg-white"
             />
-            {errors.username && <Text style={styles.errorText}>{errors.username}</Text>}
-          </View>
+            {errors.username && <Text className="text-red-500 text-xs -mt-3 mb-2">{errors.username}</Text>}
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
+            <Text className="text-gray-700 mb-1">Password</Text>
             <TextInput
-              style={styles.input}
               placeholder="Enter your password"
               secureTextEntry
               value={formData.password}
               onChangeText={(text) => handleChange('password', text)}
+              className="border border-gray-300 rounded-md px-4 py-2 mb-4 bg-white"
             />
-            {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
-          </View>
+            {errors.password && <Text className="text-red-500 text-xs -mt-3 mb-2">{errors.password}</Text>}
 
-          <TouchableOpacity style={styles.forgotPassword} onPress={navigateToForgotPassword}>
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
+            <View className="flex-row justify-between items-center mb-4">
+              <View className="flex-row items-center">
+                <Switch
+                  value={rememberMe}
+                  onValueChange={setRememberMe}
+                  trackColor={{ false: '#d1d5db', true: '#22c55e' }}
+                  thumbColor={rememberMe ? '#fff' : '#f4f4f4'}
+                />
+                <Text className="ml-2 text-xs text-gray-600">Remember me</Text>
+              </View>
+              <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword' as never)}>
+                <Text className="text-green-500 text-sm">Forgot password?</Text>
+              </TouchableOpacity>
+            </View>
 
-          <TouchableOpacity 
-            style={styles.loginButton} 
-            onPress={handleSubmit}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.loginButtonText}>Login</Text>
-            )}
-          </TouchableOpacity>
+            <TouchableOpacity
+              className="bg-green-500 py-3 rounded-xl items-center mb-4"
+              onPress={handleSubmit}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text className="text-white font-semibold">Sign In</Text>
+              )}
+            </TouchableOpacity>
 
-          <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>Don't have an account?</Text>
-            <TouchableOpacity onPress={navigateToRegister}>
-              <Text style={styles.registerButtonText}>Register</Text>
+            <View className="flex-row items-center justify-center mb-4">
+              <View className="flex-1 h-px bg-gray-200" />
+              <Text className="mx-3 text-gray-500 text-xs">Or continue with</Text>
+              <View className="flex-1 h-px bg-gray-200" />
+            </View>
+
+            <TouchableOpacity className="flex-row items-center justify-center border border-gray-300 py-3 rounded-lg mb-3">
+              <Image source={GoogleLogo} className="w-5 h-5 mr-2" />
+              <Text className="text-gray-700">Continue with Google</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity className="flex-row items-center justify-center border border-gray-300 py-3 rounded-lg">
+              <Image source={AppleLogo} className="w-5 h-5 mr-2" />
+              <Text className="text-gray-700">Continue with Apple</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+          <View className="items-center mt-6">
+            <Text className="text-gray-700">
+              Don’t have an account?{' '}
+              <Link href="/register" className="text-green-500 font-semibold"> {/* Link to Register Page */}
+                Sign up
+              </Link>
+            </Text>
+          </View>
+
+          <View className="flex-row flex-wrap justify-between mt-8">
+            <FeatureCard title="Earn Points" subtitle="Get rewards for recycling" />
+            <FeatureCard title="Daily Streaks" subtitle="Track your progress" />
+            <FeatureCard title="AI Recognition" subtitle="Smart recycling guide" />
+            <FeatureCard title="Redeem Rewards" subtitle="At partner locations" />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  keyboardAvoidingView: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 40,
-  },
-  formContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    textAlign: 'center',
-    color: '#333',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 25,
-    textAlign: 'center',
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 5,
-    color: '#555',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#fafafa',
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 12,
-    marginTop: 5,
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 25,
-  },
-  forgotPasswordText: {
-    color: '#3498db',
-    fontSize: 14,
-  },
-  loginButton: {
-    backgroundColor: '#3498db',
-    borderRadius: 8,
-    padding: 15,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  loginButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  registerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  registerText: {
-    fontSize: 14,
-    color: '#555',
-    marginRight: 5,
-  },
-  registerButtonText: {
-    color: '#3498db',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-});
+const FeatureCard = ({ title, subtitle }: { title: string; subtitle: string }) => (
+  <View className="w-[48%] bg-green-50 p-3 rounded-xl mb-3">
+    <Text className="text-green-800 font-semibold">{title}</Text>
+    <Text className="text-gray-600 text-xs">{subtitle}</Text>
+  </View>
+);
 
 export default Login;

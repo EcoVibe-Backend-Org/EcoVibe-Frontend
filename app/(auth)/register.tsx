@@ -1,88 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  ScrollView,
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Image,
+  View,
+  Switch,
+  SafeAreaView, // Import SafeAreaView
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
+import GoogleLogo from '../../assets/google.png';
+import AppleLogo from '../../assets/apple.png';
+import { Link } from 'expo-router'; // Import the Link component from expo-router
 
-interface RegisterProps {}
-
-const Register: React.FC<RegisterProps> = () => {
+const SignUp: React.FC = () => {
   const navigation = useNavigation();
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    username: '',
-    email: '',
-    phone: '+20',
-    password: '',
-    confirmPassword: '',
-  });
+  const [formData, setFormData] = useState({ username: '', email: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  // Disable the header
+  useEffect(() => {
+    navigation.setOptions({
+      headerShown: false, // Hide the header on this screen
+    });
+  }, [navigation]);
 
   const validateForm = () => {
     let tempErrors: Record<string, string> = {};
     let isValid = true;
 
-    // First Name validation
-    if (!formData.firstName.trim()) {
-      tempErrors.firstName = 'First name is required';
-      isValid = false;
-    }
-
-    // Last Name validation
-    if (!formData.lastName.trim()) {
-      tempErrors.lastName = 'Last name is required';
-      isValid = false;
-    }
-
-    // Username validation
     if (!formData.username.trim()) {
       tempErrors.username = 'Username is required';
       isValid = false;
     }
-
-    // Email validation
     if (!formData.email.trim()) {
       tempErrors.email = 'Email is required';
       isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      tempErrors.email = 'Email is invalid';
-      isValid = false;
     }
-
-    // Phone validation
-    if (!formData.phone.trim()) {
-      tempErrors.phone = 'Phone number is required';
-      isValid = false;
-    } else if (!formData.phone.startsWith('+20') || formData.phone.length < 12) {
-      tempErrors.phone = 'Enter a valid Egyptian phone number';
-      isValid = false;
-    }
-
-    // Password validation
     if (!formData.password) {
       tempErrors.password = 'Password is required';
-      isValid = false;
-    } else if (formData.password.length < 8) {
-      tempErrors.password = 'Password must be at least 8 characters';
-      isValid = false;
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      tempErrors.password = 'Password must contain uppercase, lowercase and a number';
-      isValid = false;
-    }
-
-    // Confirm Password validation
-    if (formData.password !== formData.confirmPassword) {
-      tempErrors.confirmPassword = 'Passwords do not match';
       isValid = false;
     }
 
@@ -91,11 +55,6 @@ const Register: React.FC<RegisterProps> = () => {
   };
 
   const handleChange = (name: string, value: string) => {
-    // For phone field, ensure it always starts with +20
-    if (name === 'phone' && !value.startsWith('+20')) {
-      value = '+20' + value.replace('+20', '');
-    }
-    
     setFormData({ ...formData, [name]: value });
   };
 
@@ -103,17 +62,9 @@ const Register: React.FC<RegisterProps> = () => {
     if (validateForm()) {
       setIsLoading(true);
       try {
-        const response = await axios.post('https://ecovibe-backend.up.railway.app/api/users/register', {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          username: formData.username,
-          email: formData.email,
-          phone: formData.phone,
-          password: formData.password,
-        });
-
-        Alert.alert('Success', 'Registration successful!');
-        navigation.navigate('Login' as never);
+        const response = await axios.post('https://ecovibe-backend.up.railway.app/api/users/register', formData);
+        console.log('success');
+        navigation.navigate('Home' as never);
       } catch (error: any) {
         const errorMessage = error.response?.data || 'Registration failed. Please try again.';
         Alert.alert('Registration Failed', errorMessage);
@@ -123,209 +74,123 @@ const Register: React.FC<RegisterProps> = () => {
     }
   };
 
-  const navigateToLogin = () => {
-    navigation.navigate('Login' as never);
-  };
-
-  const navigateToForgotPassword = () => {
-    navigation.navigate('ForgotPassword' as never);
-  };
-
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.formContainer}>
-        <Text style={styles.title}>Create Account</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}> {/* Wrap the entire content with SafeAreaView and set background to white */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="p-6">
+          <View className="items-center mt-6 mb-8">
+            <View className="bg-green-100 p-4 rounded-full mb-3">
+              <Text className="text-2xl">♻️</Text>
+            </View>
+            <Text className="text-xl font-semibold text-gray-900">Welcome to EcoVibe</Text>
+            <Text className="mt-1 text-gray-500">Recycle Smarter, Live Better!</Text>
+          </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>First Name</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your first name"
-            value={formData.firstName}
-            onChangeText={(text) => handleChange('firstName', text)}
-          />
-          {errors.firstName && <Text style={styles.errorText}>{errors.firstName}</Text>}
-        </View>
+          <View className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <Text className="text-gray-700 mb-1">Username</Text>
+            <TextInput
+              placeholder="Enter your username"
+              autoCapitalize="none"
+              value={formData.username}
+              onChangeText={(text) => handleChange('username', text)}
+              className="border border-gray-300 rounded-md px-4 py-2 mb-4 bg-white"
+            />
+            {errors.username && <Text className="text-red-500 text-xs -mt-3 mb-2">{errors.username}</Text>}
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Last Name</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your last name"
-            value={formData.lastName}
-            onChangeText={(text) => handleChange('lastName', text)}
-          />
-          {errors.lastName && <Text style={styles.errorText}>{errors.lastName}</Text>}
-        </View>
+            <Text className="text-gray-700 mb-1">Email</Text>
+            <TextInput
+              placeholder="Enter your email"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={formData.email}
+              onChangeText={(text) => handleChange('email', text)}
+              className="border border-gray-300 rounded-md px-4 py-2 mb-4 bg-white"
+            />
+            {errors.email && <Text className="text-red-500 text-xs -mt-3 mb-2">{errors.email}</Text>}
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Username</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Choose a username"
-            value={formData.username}
-            onChangeText={(text) => handleChange('username', text)}
-          />
-          {errors.username && <Text style={styles.errorText}>{errors.username}</Text>}
-        </View>
+            <Text className="text-gray-700 mb-1">Password</Text>
+            <TextInput
+              placeholder="Enter your password"
+              secureTextEntry
+              value={formData.password}
+              onChangeText={(text) => handleChange('password', text)}
+              className="border border-gray-300 rounded-md px-4 py-2 mb-4 bg-white"
+            />
+            {errors.password && <Text className="text-red-500 text-xs -mt-3 mb-2">{errors.password}</Text>}
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your email"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={formData.email}
-            onChangeText={(text) => handleChange('email', text)}
-          />
-          {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
-        </View>
+            <View className="flex-row justify-between items-center mb-4">
+              <View className="flex-row items-center">
+                <Switch
+                  value={rememberMe}
+                  onValueChange={setRememberMe}
+                  trackColor={{ false: '#d1d5db', true: '#22c55e' }}
+                  thumbColor={rememberMe ? '#fff' : '#f4f4f4'}
+                />
+                <Text className="ml-2 text-xs text-gray-600">Remember me</Text>
+              </View>
+              <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword' as never)}>
+                <Text className="text-green-500 text-sm">Forgot password?</Text>
+              </TouchableOpacity>
+            </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Phone Number</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="+20 Phone Number"
-            keyboardType="phone-pad"
-            value={formData.phone}
-            onChangeText={(text) => handleChange('phone', text)}
-          />
-          {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
-        </View>
+            <TouchableOpacity
+              className="bg-green-500 py-3 rounded-xl items-center mb-4"
+              onPress={handleSubmit}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text className="text-white font-semibold">Sign Up</Text>
+              )}
+            </TouchableOpacity>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Create a password"
-            secureTextEntry
-            value={formData.password}
-            onChangeText={(text) => handleChange('password', text)}
-          />
-          {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
-        </View>
+            <View className="flex-row items-center justify-center mb-4">
+              <View className="flex-1 h-px bg-gray-200" />
+              <Text className="mx-3 text-gray-500 text-xs">Or continue with</Text>
+              <View className="flex-1 h-px bg-gray-200" />
+            </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Confirm Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Confirm your password"
-            secureTextEntry
-            value={formData.confirmPassword}
-            onChangeText={(text) => handleChange('confirmPassword', text)}
-          />
-          {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
-        </View>
+            <TouchableOpacity className="flex-row items-center justify-center border border-gray-300 py-3 rounded-lg mb-3">
+              <Image source={GoogleLogo} className="w-5 h-5 mr-2" />
+              <Text className="text-gray-700">Continue with Google</Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity style={styles.forgotPassword} onPress={navigateToForgotPassword}>
-          <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-        </TouchableOpacity>
+            <TouchableOpacity className="flex-row items-center justify-center border border-gray-300 py-3 rounded-lg">
+              <Image source={AppleLogo} className="w-5 h-5 mr-2" />
+              <Text className="text-gray-700">Continue with Apple</Text>
+            </TouchableOpacity>
+          </View>
 
-        <TouchableOpacity 
-          style={styles.registerButton} 
-          onPress={handleSubmit}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.registerButtonText}>Register</Text>
-          )}
-        </TouchableOpacity>
+          <View className="items-center mt-6">
+            <Text className="text-gray-700">
+              Already have an account?{' '}
+              <Link href="/login" className="text-green-500 font-semibold"> {/* Link to Login Page */}
+                Sign in
+              </Link>
+            </Text>
+          </View>
 
-        <View style={styles.loginContainer}>
-          <Text style={styles.loginText}>Already have an account?</Text>
-          <TouchableOpacity onPress={navigateToLogin}>
-            <Text style={styles.loginButtonText}>Log In</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ScrollView>
+          <View className="flex-row flex-wrap justify-between mt-8">
+            <FeatureCard title="Earn Points" subtitle="Get rewards for recycling" />
+            <FeatureCard title="Daily Streaks" subtitle="Track your progress" />
+            <FeatureCard title="AI Recognition" subtitle="Smart recycling guide" />
+            <FeatureCard title="Redeem Rewards" subtitle="At partner locations" />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 20,
-    paddingVertical: 30,
-  },
-  formContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-    color: '#333',
-  },
-  inputGroup: {
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 5,
-    color: '#555',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#fafafa',
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 12,
-    marginTop: 5,
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 20,
-  },
-  forgotPasswordText: {
-    color: '#3498db',
-    fontSize: 14,
-  },
-  registerButton: {
-    backgroundColor: '#3498db',
-    borderRadius: 8,
-    padding: 15,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  registerButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  loginContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loginText: {
-    fontSize: 14,
-    color: '#555',
-    marginRight: 5,
-  },
-  loginButtonText: {
-    color: '#3498db',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-});
+const FeatureCard = ({ title, subtitle }: { title: string; subtitle: string }) => (
+  <View className="w-[48%] bg-green-50 p-3 rounded-xl mb-3">
+    <Text className="text-green-800 font-semibold">{title}</Text>
+    <Text className="text-gray-600 text-xs">{subtitle}</Text>
+  </View>
+);
 
-export default Register;
+export default SignUp;
