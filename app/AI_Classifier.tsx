@@ -142,8 +142,8 @@ class AiClassifier extends Component<{}, AiClassifierState> {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
           {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
-          <Button title="Take a Photo" onPress={this.takePhoto} />
-          {loading && <ActivityIndicator size="large" color="#0000ff" />}
+          <Button title="Take a Photo" onPress={this.takePhoto} color="#4CAF50" />
+          {loading && <ActivityIndicator size="large" color="#4CAF50" style={styles.loadingIndicator} />}
           {this.state.analysisResult && (
             <View style={styles.resultContainer}>
               <Text style={styles.resultText}>{displayedText}</Text>
@@ -158,26 +158,41 @@ class AiClassifier extends Component<{}, AiClassifierState> {
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
+    paddingTop: 20, // Add top padding to match other sections
   },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   image: {
     width: 300,
     height: 300,
     marginBottom: 20,
-    borderRadius: 10,
+    borderRadius: 15, // Apply rounded corners for consistency
+    borderWidth: 2,
+    borderColor: '#ddd', // Border color for the image
+  },
+  loadingIndicator: {
+    marginTop: 20,
   },
   resultContainer: {
-    marginTop: 20,
+    marginTop: 30,
     width: '100%',
+    padding: 15,
+    backgroundColor: '#F1F1F1', // Add a background for better readability
+    borderRadius: 10, // Rounded corners for the result box
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
   },
   resultText: {
     fontSize: 16,
     textAlign: 'left',
+    color: '#333',
   },
 });
 
