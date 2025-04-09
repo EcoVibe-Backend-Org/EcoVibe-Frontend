@@ -16,8 +16,8 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import GoogleLogo from '../../assets/google.png';
 import AppleLogo from '../../assets/apple.png';
-import { Link } from 'expo-router'; // Import the Link component from expo-router
-import { SafeAreaView } from 'react-native-safe-area-context'; // Import SafeAreaView
+import { Link, router } from 'expo-router'; // Import the Link component from expo-router
+import { SafeAreaView } from 'react-native'; // Import SafeAreaView
 
 const Login: React.FC = () => {
   const navigation = useNavigation();
@@ -29,7 +29,7 @@ const Login: React.FC = () => {
   // Disable the header
   useEffect(() => {
     navigation.setOptions({
-      headerShown: false, // Hide the header on this screen
+      headerShown: false, 
     });
   }, [navigation]);
 
@@ -60,6 +60,7 @@ const Login: React.FC = () => {
       try {
         const response = await axios.post('https://ecovibe-backend.up.railway.app/api/users/login', formData);
         console.log('success');
+        router.push('../home');
         navigation.navigate('Home' as never);
       } catch (error: any) {
         const errorMessage = error.response?.data || 'Login failed. Please check your credentials.';

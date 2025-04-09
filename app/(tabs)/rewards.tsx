@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, Text} from 'react-native';
+import { View, Text, SafeAreaView} from 'react-native';
 
 const Rewards = () => {
   return (
-    <View>
-      <Text >Welcome to Rewards!</Text>
-    </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+      <View>
+        <Text >Welcome to Rewards!</Text>
+      </View>
+    </SafeAreaView>
   );
 };
 

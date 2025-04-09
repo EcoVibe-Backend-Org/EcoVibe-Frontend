@@ -1,10 +1,9 @@
 import React from 'react';
-import { View, Text, Image, ScrollView, SafeAreaView } from 'react-native';
-import { TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, Image, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
+import { router } from 'expo-router';
 
 import ScanIcon from '../../assets/scan.png';
-import RecyclingIcon from '../../assets/recycle.png';
+import CommunityIcon from '../../assets/community.png';
 import BinIcon from '../../assets/recycle.png';
 import RewardIcon from '../../assets/rewards.png';
 import MilestoneImage from '../../assets/trashBins.png';
@@ -13,18 +12,7 @@ import ProfileIcon from '../../assets/user.png';
 import AchievementIcon from '../../assets/achievement.png';
 import TicketIcon from '../../assets/ticket.png';
 
-
-
 export default function EcoVibeScreen() {
-  const navigation = useNavigation();
-
-  const menuItems = [
-    { icon: ScanIcon, label: 'Scan Item', screen: 'ScanItemScreen' },
-    { icon: RecyclingIcon, label: 'Recycling AI', screen: 'RecyclingAIScreen' },
-    { icon: BinIcon, label: 'Find Bins', screen: 'FindBinsScreen' },
-    { icon: RewardIcon, label: 'Redeem Rewards', screen: 'RedeemRewardsScreen' },
-  ];
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <ScrollView className="px-4 pt-8">
@@ -45,16 +33,37 @@ export default function EcoVibeScreen() {
 
         {/* Menu Options */}
         <View className="flex-row flex-wrap justify-between mb-6">
-          {menuItems.map((item, idx) => (
-            <TouchableOpacity
-              key={idx}
-              className="w-[48%] bg-gray-100 rounded-xl p-4 mb-4 items-center" 
-              onPress={() => navigation.navigate(item.screen)}
-            >
-              <Image source={item.icon} className="w-10 h-10 mb-2" style={{ tintColor: '#4CAF50' }} resizeMode="contain" />
-              <Text className="text-sm font-medium text-gray-700">{item.label}</Text>
-            </TouchableOpacity>
-          ))}
+          <TouchableOpacity
+            className="w-[48%] bg-gray-100 rounded-xl p-4 mb-4 items-center"
+            onPress={() => router.push('./scan')}
+          >
+            <Image source={ScanIcon} className="w-10 h-10 mb-2" style={{ tintColor: '#4CAF50' }} resizeMode="contain" />
+            <Text className="text-sm font-medium text-gray-700">Scan Item</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="w-[48%] bg-gray-100 rounded-xl p-4 mb-4 items-center"
+            onPress={() => router.push('./community')}
+          >
+            <Image source={CommunityIcon} className="w-10 h-10 mb-2" style={{ tintColor: '#4CAF50' }} resizeMode="contain" />
+            <Text className="text-sm font-medium text-gray-700">Community</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="w-[48%] bg-gray-100 rounded-xl p-4 mb-4 items-center"
+            onPress={() => router.push('./map')}
+          >
+            <Image source={BinIcon} className="w-10 h-10 mb-2" style={{ tintColor: '#4CAF50' }} resizeMode="contain" />
+            <Text className="text-sm font-medium text-gray-700">Find Bins</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="w-[48%] bg-gray-100 rounded-xl p-4 mb-4 items-center"
+            onPress={() => router.push('./rewards')}
+          >
+            <Image source={RewardIcon} className="w-10 h-10 mb-2" style={{ tintColor: '#4CAF50' }} resizeMode="contain" />
+            <Text className="text-sm font-medium text-gray-700">Redeem Rewards</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Your Impact */}
@@ -99,10 +108,10 @@ export default function EcoVibeScreen() {
           </View>
 
           <View>
-            <Image source={CoffeeShop} className="w-full h-36 rounded-xl mb-2"  resizeMode="contain" /> 
+            <Image source={CoffeeShop} className="w-full h-36 rounded-xl mb-2" resizeMode="contain" />
             <View className="py-3 flex-row">
-            <Image source={TicketIcon} className="w-6 h-6 rounded-full"/>
-            <Text className="text-sm font-semibold text-purple-600"> promotion</Text>
+              <Image source={TicketIcon} className="w-6 h-6 rounded-full"/>
+              <Text className="text-sm font-semibold text-purple-600"> promotion</Text>
             </View>
             <Text className="text-sm text-gray-700">Koffee Kulture Discount</Text>
             <Text className="text-xs text-gray-500">20% off with 100 points</Text>

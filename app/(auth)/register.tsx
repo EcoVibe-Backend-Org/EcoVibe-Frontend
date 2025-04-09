@@ -17,11 +17,18 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import GoogleLogo from '../../assets/google.png';
 import AppleLogo from '../../assets/apple.png';
-import { Link } from 'expo-router'; // Import the Link component from expo-router
+import { Link, router } from 'expo-router'; // Import the Link component from expo-router
 
 const SignUp: React.FC = () => {
   const navigation = useNavigation();
-  const [formData, setFormData] = useState({ username: '', email: '', password: '' });
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    username: '',
+    email: '',
+    phone: '',
+    password: ''
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -36,7 +43,15 @@ const SignUp: React.FC = () => {
   const validateForm = () => {
     let tempErrors: Record<string, string> = {};
     let isValid = true;
-
+  
+    if (!formData.firstName.trim()) {
+      tempErrors.firstName = 'First name is required';
+      isValid = false;
+    }
+    if (!formData.lastName.trim()) {
+      tempErrors.lastName = 'Last name is required';
+      isValid = false;
+    }
     if (!formData.username.trim()) {
       tempErrors.username = 'Username is required';
       isValid = false;
@@ -45,11 +60,15 @@ const SignUp: React.FC = () => {
       tempErrors.email = 'Email is required';
       isValid = false;
     }
+    if (!formData.phone.trim()) {
+      tempErrors.phone = 'Phone number is required';
+      isValid = false;
+    }
     if (!formData.password) {
       tempErrors.password = 'Password is required';
       isValid = false;
     }
-
+  
     setErrors(tempErrors);
     return isValid;
   };
@@ -64,7 +83,7 @@ const SignUp: React.FC = () => {
       try {
         const response = await axios.post('https://ecovibe-backend.up.railway.app/api/users/register', formData);
         console.log('success');
-        navigation.navigate('Home' as never);
+        router.push('./login');
       } catch (error: any) {
         const errorMessage = error.response?.data || 'Registration failed. Please try again.';
         Alert.alert('Registration Failed', errorMessage);
@@ -90,6 +109,35 @@ const SignUp: React.FC = () => {
           </View>
 
           <View className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+          <Text className="text-gray-700 mb-1">First Name</Text>
+          <TextInput
+            placeholder="Enter your first name"
+            autoCapitalize="words"
+            value={formData.firstName}
+            onChangeText={(text) => handleChange('firstName', text)}
+            className="border border-gray-300 rounded-md px-4 py-2 mb-4 bg-white"
+          />
+          {errors.firstName && <Text className="text-red-500 text-xs -mt-3 mb-2">{errors.firstName}</Text>}
+
+          <Text className="text-gray-700 mb-1">Last Name</Text>
+          <TextInput
+            placeholder="Enter your last name"
+            autoCapitalize="words"
+            value={formData.lastName}
+            onChangeText={(text) => handleChange('lastName', text)}
+            className="border border-gray-300 rounded-md px-4 py-2 mb-4 bg-white"
+          />
+          {errors.lastName && <Text className="text-red-500 text-xs -mt-3 mb-2">{errors.lastName}</Text>}
+
+          <Text className="text-gray-700 mb-1">Phone</Text>
+          <TextInput
+            placeholder="Enter your phone number"
+            keyboardType="phone-pad"
+            value={formData.phone}
+            onChangeText={(text) => handleChange('phone', text)}
+            className="border border-gray-300 rounded-md px-4 py-2 mb-4 bg-white"
+          />
+          {errors.phone && <Text className="text-red-500 text-xs -mt-3 mb-2">{errors.phone}</Text>}
             <Text className="text-gray-700 mb-1">Username</Text>
             <TextInput
               placeholder="Enter your username"
