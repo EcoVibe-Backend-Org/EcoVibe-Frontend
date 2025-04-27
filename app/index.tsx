@@ -4,11 +4,14 @@ import Login from "./(auth)/login";
 import Home from "./(tabs)/home";
 import { Redirect } from 'expo-router';
 
-const isLoggedIn = false;
+const debugMode = true;
 
 
 export default function Index() {
+  if (!debugMode)
   return <Redirect href={"./(auth)/login"} />;
+  else
+  return <Redirect href={"./(tabs)/home"} />;
 }
 
 
