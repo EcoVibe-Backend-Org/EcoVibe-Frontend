@@ -68,7 +68,7 @@ const _Layout = () => {
         }}
       />
       <Tabs.Screen
-        name="community"
+        name="communityfolder"
         options={{
           title: "Community",
           headerShown: false,
