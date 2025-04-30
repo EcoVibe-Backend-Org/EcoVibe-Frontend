@@ -8,6 +8,7 @@ const debugMode = true;
 
 
 export default function Index() {
+  console.log("🔥 Hermes enabled:", !!global.HermesInternal);
   if (!debugMode)
   return <Redirect href={"./(auth)/login"} />;
   else
