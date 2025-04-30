@@ -18,6 +18,7 @@ import GoogleLogo from '../../assets/google.png';
 import AppleLogo from '../../assets/apple.png';
 import { Link, router } from 'expo-router'; // Import the Link component from expo-router
 import { SafeAreaView } from 'react-native'; // Import SafeAreaView
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login: React.FC = () => {
   const navigation = useNavigation();
@@ -61,6 +62,7 @@ const Login: React.FC = () => {
         const response = await axios.post('https://ecovibe-backend.up.railway.app/api/users/login', formData);
         console.log('success');
         router.push('../home');
+        AsyncStorage.setItem('userData', JSON.stringify(response.data));
         navigation.navigate('Home' as never);
       } catch (error: any) {
         const errorMessage = error.response?.data || 'Login failed. Please check your credentials.';
