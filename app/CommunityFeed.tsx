@@ -496,7 +496,7 @@ const handleDelete = async (postId: string) => {
             
             <TouchableOpacity
               onPress={handleSubmit}
-              className="bg-indigo-600 p-3 rounded-md"
+              className="bg-green-400 p-3 rounded-md"
               disabled={loading}
             >
               {loading ? (
