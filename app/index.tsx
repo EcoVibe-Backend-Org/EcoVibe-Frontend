@@ -4,7 +4,7 @@ import Login from "./(auth)/login";
 import Home from "./(tabs)/home";
 import { Redirect } from 'expo-router';
 
-const debugMode = true;
+const debugMode = true; //goes straight to home
 
 
 export default function Index() {

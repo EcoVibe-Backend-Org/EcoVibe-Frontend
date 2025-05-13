@@ -1,6 +1,7 @@
-import { Text, View, Button } from "react-native";
+import { Text, View, Alert, TouchableOpacity } from "react-native";
 import React, { Component } from "react";
 import { CameraView, Camera } from "expo-camera";
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 interface BarcodeScanState {
   hasPermission: boolean | null;
@@ -8,8 +9,12 @@ interface BarcodeScanState {
   text: string;
 }
 
-class BarcodeScan extends Component<{}, BarcodeScanState> {
-  constructor(props: {}) {
+type Props = {
+  navigation: any; // Use your correct navigation type here
+};
+
+class BarcodeScan extends Component<Props, BarcodeScanState> {
+  constructor(props: Props) {
     super(props);
     this.state = {
       hasPermission: null,
@@ -35,6 +40,12 @@ class BarcodeScan extends Component<{}, BarcodeScanState> {
     console.log(`Type: ${type}\nData: ${data}`);
   };
 
+  handleRecycleButton = () => {
+    const { navigation } = this.props;
+    Alert.alert("500 points received!");
+    navigation.navigate("Home"); // Change "Home" to your home/tab route name if needed
+  };
+
   renderPermissionRequestView() {
     return (
       <View className="flex-1 bg-white items-center justify-center p-4">
@@ -47,7 +58,19 @@ class BarcodeScan extends Component<{}, BarcodeScanState> {
     return (
       <View className="flex-1 bg-white items-center justify-center p-4">
         <Text className="text-lg text-center mb-4 font-semibold">No access to camera</Text>
-        <Button title="Allow Camera" onPress={this.askForCameraPermission} />
+        <TouchableOpacity
+          style={{
+            backgroundColor: "#22c55e",
+            padding: 14,
+            borderRadius: 8,
+            marginTop: 16,
+            width: 180,
+            alignItems: "center"
+          }}
+          onPress={this.askForCameraPermission}
+        >
+          <Text style={{ color: "white", fontWeight: "bold" }}>Allow Camera</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -72,11 +95,37 @@ class BarcodeScan extends Component<{}, BarcodeScanState> {
         </View>
         <Text className="text-xl text-center mt-5">{text}</Text>
         {scanner && (
-          <Button 
-            title="Scan Again?" 
-            onPress={() => this.setState({ scanner: false })} 
-            color="tomato" 
-          />
+          <View style={{ marginTop: 20, width: "100%", alignItems: "center" }}>
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#22c55e",
+                padding: 14,
+                borderRadius: 8,
+                alignItems: "center",
+                marginBottom: 12,
+                width: 220,
+              }}
+              onPress={() => this.setState({ scanner: false })}
+            >
+              <Text style={{ color: "white", fontWeight: "bold", fontSize: 16 }}>
+                Scan Again?
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#22c55e",
+                padding: 14,
+                borderRadius: 8,
+                alignItems: "center",
+                width: 220,
+              }}
+              onPress={this.handleRecycleButton}
+            >
+              <Text style={{ color: "white", fontWeight: "bold", fontSize: 16 }}>
+                I Scanned this item
+              </Text>
+            </TouchableOpacity>
+          </View>
         )}
       </View>
     );
