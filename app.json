@@ -1,5 +1,6 @@
 {
   "expo": {
+    "jsEngine": "hermes",
     "name": "eco-vibe",
     "slug": "eco-vibe",
     "version": "1.0.0",
@@ -38,7 +39,9 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-barcode-scanner"
+      "expo-barcode-scanner",
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
