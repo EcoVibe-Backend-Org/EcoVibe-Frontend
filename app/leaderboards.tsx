@@ -112,7 +112,6 @@ export default function Leaderboard() {
       const rankResponse = await api.get('/users/rank');
       
       // Create current user object
-        // Create current user object
         const currentUserData = {
         id: userId ?? '', // Convert null to empty string
         name: `${firstName || 'User'}`,
