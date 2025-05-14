@@ -6,6 +6,9 @@ const RewardsScreen = () => {
 const [modalVisible, setModalVisible] = useState(false);
 const [selectedReward, setSelectedReward] = useState(null);
 const [visibleRewards, setVisibleRewards] = useState(2); // Show 2 rewards at first
+const [visibleVouchers, setVisibleVouchers] = useState(2); // Show 2 vouchers at first
+const [voucherModalVisible, setVoucherModalVisible] = useState(false); // New state for voucher modal
+const [selectedVoucher, setSelectedVoucher] = useState(null); // New state for selected voucher
 
   const rewards = [
     {
@@ -15,7 +18,8 @@ const [visibleRewards, setVisibleRewards] = useState(2); // Show 2 rewards at fi
       points: 100,
       description: 'Get 15% off your next coffee purchase at participating cafés.',
       expirationDays: 30,
-      locations: ['Green Café', 'Eco Coffee', 'Planet Friendly Brews']
+      locations: ['Green Café', 'Eco Coffee', 'Planet Friendly Brews'],
+      staticCode: 'GFT-COF-9357A1XZB4'
     },
     {
       id: 2,
@@ -24,7 +28,8 @@ const [visibleRewards, setVisibleRewards] = useState(2); // Show 2 rewards at fi
       points: 500,
       description: 'Get $10 off your next purchase at eco-friendly stores.',
       expirationDays: 60,
-      locations: ['Green Market', 'Sustainable Goods', 'EcoLife Store']
+      locations: ['Green Market', 'Sustainable Goods', 'EcoLife Store'],
+      staticCode: 'GFT-SHP-29HZ7PLQF9'
     },
     {
       id: 3,
@@ -33,7 +38,8 @@ const [visibleRewards, setVisibleRewards] = useState(2); // Show 2 rewards at fi
       points: 200,
       description: 'Donate on your behalf to a green initiative.',
       expirationDays: 0,
-      locations: ['Global Green Foundation']
+      locations: ['Global Green Foundation'],
+      staticCode: 'GFT-CHR-5YUA36TZ8K'
     },
     {
       id: 4,
@@ -42,9 +48,17 @@ const [visibleRewards, setVisibleRewards] = useState(2); // Show 2 rewards at fi
       points: 350,
       description: 'Get a premium reusable water bottle.',
       expirationDays: 90,
-      locations: ['EcoLife Store']
+      locations: ['EcoLife Store'],
+      staticCode: 'GFT-BTL-Q2ZL6KM94X'
     },
   ];
+
+  // Function to get future date for expiration display
+  const getFutureDate = (days) => {
+    const date = new Date();
+    date.setDate(date.getDate() + days);
+    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+  };
 
   const openRewardModal = (reward) => {
     setSelectedReward(reward);
@@ -59,6 +73,17 @@ const [visibleRewards, setVisibleRewards] = useState(2); // Show 2 rewards at fi
     // Handle redemption logic here
     alert(`Redeeming ${selectedReward.name} for ${selectedReward.points} points`);
     setModalVisible(false);
+  };
+
+  // New function to open voucher modal
+  const openVoucherModal = (voucher) => {
+    setSelectedVoucher(voucher);
+    setVoucherModalVisible(true);
+  };
+
+  // New function to close voucher modal
+  const closeVoucherModal = () => {
+    setVoucherModalVisible(false);
   };
 
   return (
@@ -274,30 +299,45 @@ const [visibleRewards, setVisibleRewards] = useState(2); // Show 2 rewards at fi
          ))}
        </View>
 
-        {/* Special Events */}
-        <View className="bg-white rounded-xl p-4 shadow mb-4">
-          <Text className="text-base font-bold mb-2">Special Events</Text>
+       {/* Bought Vouchers - EDITED SECTION */}
+       <View className="bg-white rounded-xl p-4 shadow mb-4">
+         <View className="flex-row justify-between items-center mb-2">
+           <Text className="text-base font-bold">Bought Vouchers</Text>
+           {visibleVouchers < rewards.length && (
+             <TouchableOpacity onPress={() => setVisibleVouchers(visibleVouchers + 2)}>
+               <Text className="text-green-600 text-xs">See All</Text>
+             </TouchableOpacity>
+           )}
+         </View>
 
-          <View className="border border-gray-200 rounded-lg p-4 mb-4">
-            <View className="flex-row justify-between items-center">
-              <View>
-                <Text className="font-medium mb-1">Double Points Weekend!</Text>
-                <Text className="text-xs text-gray-500">Get double eco points for recycling items</Text>
-              </View>
-              <View className="h-14 w-14 items-center justify-center">
-                <Ionicons name="star" size={36} color="#f59e0b" />
-              </View>
-            </View>
-
-            <TouchableOpacity className="bg-green-500 rounded-full py-2 items-center mt-3">
-              <Text className="text-white font-medium">Learn More</Text>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity className="bg-green-100 rounded-full py-3 items-center">
-            <Text className="text-green-600 font-medium">See More Activities</Text>
-          </TouchableOpacity>
-        </View>
+         {rewards.slice(0, visibleVouchers).map((reward) => (
+           <TouchableOpacity
+             key={`voucher-${reward.id}`}
+             className="border border-gray-200 rounded-lg p-3 mb-2"
+             onPress={() => openVoucherModal(reward)}
+           >
+             <View className="flex-row items-center justify-between">
+               <View className="flex-row items-center">
+                 <View className="w-10 h-10 rounded-full bg-green-100 items-center justify-center">
+                   <Ionicons name={reward.icon} size={20} color="#22c55e" />
+                 </View>
+                 <View className="ml-2">
+                   <Text className="font-medium">{reward.name}</Text>
+                   <Text className="text-xs text-gray-400">
+                     Expires: {getFutureDate(reward.expirationDays)}
+                   </Text>
+                 </View>
+               </View>
+               <TouchableOpacity
+                 className="bg-blue-500 px-3 py-1 rounded-full"
+                 onPress={() => openVoucherModal(reward)}
+               >
+                 <Text className="text-white text-xs font-medium">Use</Text>
+               </TouchableOpacity>
+             </View>
+           </TouchableOpacity>
+         ))}
+       </View>
       </ScrollView>
 
       {/* Reward Modal */}
@@ -362,6 +402,88 @@ const [visibleRewards, setVisibleRewards] = useState(2); // Show 2 rewards at fi
                   onPress={closeModal}
                 >
                   <Text className="text-gray-500 font-medium">Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Voucher Modal - NEW MODAL */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={voucherModalVisible}
+        onRequestClose={closeVoucherModal}
+      >
+        <View className="flex-1 justify-end bg-black/50">
+          <View className="bg-white rounded-t-3xl p-5">
+            <View className="items-center mb-2">
+              <View className="w-10 h-1 bg-gray-300 rounded-full mb-4" />
+              <Text className="text-xl font-bold mb-1">Your Voucher</Text>
+            </View>
+
+            {selectedVoucher && (
+              <View className="mb-4">
+                <View className="flex-row items-center mb-4">
+                  <View className="w-16 h-16 rounded-full bg-green-100 items-center justify-center mr-4">
+                    <Ionicons name={selectedVoucher.icon} size={32} color="#22c55e" />
+                  </View>
+                  <View>
+                    <Text className="text-lg font-bold">{selectedVoucher.name}</Text>
+                    <Text className="text-gray-500">Ready to use</Text>
+                  </View>
+                </View>
+
+                <View className="bg-gray-50 p-4 rounded-xl mb-4">
+                  <Text className="text-gray-800 mb-3">{selectedVoucher.description}</Text>
+
+                  <View className="mb-4">
+                    <Text className="text-gray-500 text-xs mb-1">VALID UNTIL</Text>
+                    <Text className="font-medium">{getFutureDate(selectedVoucher.expirationDays)}</Text>
+                  </View>
+
+                  <View className="mb-4">
+                    <Text className="text-gray-500 text-xs mb-1">AVAILABLE AT</Text>
+                    {selectedVoucher.locations.map((location, index) => (
+                      <Text key={index} className="font-medium">• {location}</Text>
+                    ))}
+                  </View>
+
+                  <View className="bg-white p-4 rounded-xl border border-gray-200 mb-2">
+                    <Text className="text-gray-500 text-xs mb-2 text-center">YOUR VOUCHER CODE</Text>
+                    <View className="flex-row items-center justify-center">
+                      <Text className="font-bold text-lg text-center">{selectedVoucher.staticCode}</Text>
+                      <TouchableOpacity className="ml-2" onPress={() => {
+                        // Copy to clipboard functionality would go here
+                        alert('Code copied to clipboard!');
+                      }}>
+                        <Ionicons name="copy-outline" size={20} color="#22c55e" />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+
+                <View className="bg-green-50 p-4 rounded-xl mb-4 flex-row items-center">
+                  <Ionicons name="information-circle-outline" size={24} color="#22c55e" />
+                  <Text className="text-green-800 ml-2 flex-1">Show this code at the checkout to redeem your voucher.</Text>
+                </View>
+
+                <TouchableOpacity
+                  className="bg-blue-500 rounded-full py-4 items-center mb-2"
+                  onPress={() => {
+                    // Handle share functionality
+                    alert('Sharing voucher!');
+                  }}
+                >
+                  <Text className="text-white font-bold">Share Voucher</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="py-3 items-center"
+                  onPress={closeVoucherModal}
+                >
+                  <Text className="text-gray-500 font-medium">Close</Text>
                 </TouchableOpacity>
               </View>
             )}
