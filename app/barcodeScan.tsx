@@ -1,11 +1,17 @@
-import { Text, View, Button } from "react-native";
+import { Text, View, Button, ScrollView } from "react-native";
 import React, { Component } from "react";
 import { CameraView, Camera } from "expo-camera";
+import axios from "axios";
+
+// Define the base API URI as a constant
+const API_BASE_URI = "https://ecovibe-backend.up.railway.app";
 
 interface BarcodeScanState {
   hasPermission: boolean | null;
   scanner: boolean;
   text: string;
+  response: string | null;
+  loading: boolean;
 }
 
 class BarcodeScan extends Component<{}, BarcodeScanState> {
@@ -14,7 +20,9 @@ class BarcodeScan extends Component<{}, BarcodeScanState> {
     this.state = {
       hasPermission: null,
       scanner: false,
-      text: "Not Yet Scanned"
+      text: "Not Yet Scanned",
+      response: null,
+      loading: false
     };
   }
 
@@ -27,12 +35,31 @@ class BarcodeScan extends Component<{}, BarcodeScanState> {
     this.setState({ hasPermission: status === "granted" });
   };
 
-  handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
+  fetchBarcodeData = async (data: string) => {
+    try {
+      this.setState({ loading: true });
+      const response = await axios.get(`${API_BASE_URI}/api/barcodes/${encodeURIComponent(data)}`);
+      if (response.data && response.data.response) {
+        this.setState({ response: response.data.response });
+      } else {
+        this.setState({ response: "Not in database yet" });
+      }
+    } catch (error) {
+      console.error("Error fetching barcode data:", error);
+      this.setState({ response: "Not in database yet" });
+    } finally {
+      this.setState({ loading: false });
+    }
+  };
+
+  handleBarCodeScanned = async ({ type, data }: { type: string; data: string }) => {
     this.setState({
       scanner: true,
-      text: `Type: ${type}\nData: ${data}`
+      text: `Type: ${type}\nData: ${data}`,
+      response: null
     });
     console.log(`Type: ${type}\nData: ${data}`);
+    await this.fetchBarcodeData(data);
   };
 
   renderPermissionRequestView() {
@@ -53,7 +80,7 @@ class BarcodeScan extends Component<{}, BarcodeScanState> {
   }
 
   renderScannerView() {
-    const { scanner, text } = this.state;
+    const { scanner, text, response, loading } = this.state;
 
     return (
       <View className="flex-1 bg-white items-center justify-center p-4">
@@ -71,10 +98,21 @@ class BarcodeScan extends Component<{}, BarcodeScanState> {
           />
         </View>
         <Text className="text-xl text-center mt-5">{text}</Text>
+        
+        {loading && <Text className="text-lg mt-2">Loading...</Text>}
+        
+        {response && (
+          <View className="mt-4 w-full max-h-40 border border-gray-300 rounded-lg p-2">
+            <ScrollView>
+              <Text className="text-base">{response}</Text>
+            </ScrollView>
+          </View>
+        )}
+        
         {scanner && (
           <Button 
             title="Scan Again?" 
-            onPress={() => this.setState({ scanner: false })} 
+            onPress={() => this.setState({ scanner: false, response: null })} 
             color="tomato" 
           />
         )}

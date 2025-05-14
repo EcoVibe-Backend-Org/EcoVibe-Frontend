@@ -12,6 +12,7 @@ import CoffeeShop from '../../assets/koffeeCulture.png';
 import ProfileIcon from '../../assets/user.png';
 import AchievementIcon from '../../assets/achievement.png';
 import TicketIcon from '../../assets/ticket.png';
+import { Ionicons } from '@expo/vector-icons';
 
 // API base URL - replace with your actual API URL
 const API_BASE_URL = 'https://ecovibe-backend.up.railway.app/api';
@@ -92,25 +93,25 @@ export default function EcoVibeScreen() {
                 return {
                     item: `Posted: ${activity.title.substring(0, 20)}${activity.title.length > 20 ? '...' : ''}`,
                     time: new Date(activity.createdAt).toLocaleString(),
-                    points: '+15'
+                    points: ''
                 };
             case 'comment':
                 return {
                     item: `Commented: ${activity.content.substring(0, 20)}${activity.content.length > 20 ? '...' : ''}`,
                     time: new Date(activity.createdAt).toLocaleString(),
-                    points: '+5'
+                    points: ''
                 };
             case 'aiClassification':
                 return {
                     item: `Scanned: ${activity.response.substring(0, 20)}${activity.response.length > 20 ? '...' : ''}`,
                     time: new Date(activity.createdAt).toLocaleString(),
-                    points: '+10'
+                    points: ''
                 };
             default:
                 return {
                     item: 'Unknown activity',
                     time: new Date(activity.createdAt).toLocaleString(),
-                    points: '+0'
+                    points: ''
                 };
         }
     };
@@ -140,7 +141,7 @@ export default function EcoVibeScreen() {
 
                 {/* Welcome Message */}
                 <Text className="text-lg font-semibold mb-1">Welcome back, <Text className="text-green-700">{firstName}</Text>!</Text>
-                <Text className="text-sm text-gray-500 mb-4">{userPoints} points <Text className="text-yellow-500">7 day streak 🔥</Text></Text>
+                <Text className="text-sm text-gray-500 mb-4">{userPoints} points <Text className="text-yellow-500">0 day streak 🔥</Text></Text>
 
                 {/* Menu Options */}
                 <View className="flex-row flex-wrap justify-between mb-6">
@@ -180,7 +181,7 @@ export default function EcoVibeScreen() {
                         className="w-[48%] bg-gray-100 rounded-xl p-4 mb-4 items-center"
                         onPress={() => router.push('../search')}
                     >
-                        <Image source={RewardIcon} className="w-10 h-10 mb-2" style={{ tintColor: '#4CAF50' }} resizeMode="contain" />
+                        <Ionicons name="people-outline" size={28} color="#4CAF50" />
                         <Text className="text-sm font-medium text-gray-700">Add Friends</Text>
                     </TouchableOpacity>
 
@@ -188,7 +189,7 @@ export default function EcoVibeScreen() {
                         className="w-[48%] bg-gray-100 rounded-xl p-4 mb-4 items-center"
                         onPress={() => router.push('../leaderboards')}
                     >
-                        <Image source={RewardIcon} className="w-10 h-10 mb-2" style={{ tintColor: '#4CAF50' }} resizeMode="contain" />
+                        <Ionicons name="trophy-outline" size={28} color="#4CAF50" />
                         <Text className="text-sm font-medium text-gray-700">View Leaderboards</Text>
                     </TouchableOpacity>
                 </View>
@@ -199,9 +200,6 @@ export default function EcoVibeScreen() {
                     <View className="bg-green-50 p-4 rounded-xl">
                         <Text className="text-xl font-bold text-green-700 mb-1">{userPoints} points</Text>
                         <Text className="text-sm text-gray-600">Items Scanned: <Text className="font-semibold text-black">{totalClassifications}</Text></Text>
-                        <Text className="text-sm text-gray-600">Waste Reduced: <Text className="font-semibold text-black">5 kg</Text></Text>
-                        <Text className="text-sm text-gray-600">CO₂ Saved: <Text className="font-semibold text-black">12 kg</Text></Text>
-                        <Text className="text-xs text-gray-400 mt-2">160 points behind Mustafa</Text>
                     </View>
                 </View>
 
