@@ -1,12 +1,20 @@
-import { Text, View, Alert, TouchableOpacity } from "react-native";
+import { Text, View, Alert, TouchableOpacity, ScrollView } from "react-native";
 import React, { useState, useEffect } from "react";
 import { CameraView, Camera } from "expo-camera";
 import { useRouter } from "expo-router";
+import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Define the base API URI as a constant
+const API_BASE_URI = "https://ecovibe-backend.up.railway.app";
 
 const BarcodeScan = () => {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanner, setScanner] = useState(false);
   const [text, setText] = useState("Not Yet Scanned");
+  const [response, setResponse] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -14,18 +22,75 @@ const BarcodeScan = () => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === "granted");
+      
+      // Get user ID
+      try {
+        const id = await AsyncStorage.getItem('userId');
+        if (id) {
+          setUserId(id);
+        } else {
+          // For testing, you can use a hardcoded ID
+          // Remove this in production
+          setUserId('65cdf0f28f6e3c7fa1b7a1e9');
+        }
+      } catch (error) {
+        console.error('Failed to get user ID:', error);
+      }
     })();
   }, []);
 
-  const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
+  const fetchBarcodeData = async (data: string) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_BASE_URI}/api/barcodes/${encodeURIComponent(data)}`);
+      if (response.data && response.data.response) {
+        setResponse(response.data.response);
+      } else {
+        setResponse("Not in database yet");
+      }
+    } catch (error) {
+      console.error("Error fetching barcode data:", error);
+      setResponse("Not in database yet");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBarCodeScanned = async ({ type, data }: { type: string; data: string }) => {
     setScanner(true);
     setText(`Type: ${type}\nData: ${data}`);
     console.log(`Type: ${type}\nData: ${data}`);
+    await fetchBarcodeData(data);
   };
 
-  const handleRecycleButton = () => {
-    Alert.alert("500 points received!");
-    router.replace("/(tabs)/home"); // Navigate using Expo Router
+  const handleRecycleButton = async () => {
+    if (!userId) {
+      Alert.alert('Error', 'User not logged in');
+      return;
+    }
+    
+    try {
+      const response = await axios.post(`${API_BASE_URI}/api/points/award`, {
+        userId,
+        points: 10, // Award 10 points for scanning
+        action: 'scan'
+      });
+      
+      if (response.data.success) {
+        Alert.alert(
+          'Success!', 
+          `You earned ${response.data.pointsAwarded} points for scanning this item.`
+        );
+        router.replace("/(tabs)/home"); // Navigate using Expo Router
+      } else {
+        throw new Error(response.data.message || 'Failed to award points');
+      }
+    } catch (error) {
+      console.error('Error awarding points:', error);
+      Alert.alert('Error', 'Failed to award points. Please try again.');
+      // Still navigate back even if points award fails
+      router.replace("/(tabs)/home");
+    }
   };
 
   if (hasPermission === null) {
@@ -76,6 +141,17 @@ const BarcodeScan = () => {
         />
       </View>
       <Text className="text-xl text-center mt-5">{text}</Text>
+      
+      {loading && <Text className="text-lg mt-2">Loading...</Text>}
+      
+      {response && (
+        <View className="mt-4 w-full max-h-40 border border-gray-300 rounded-lg p-2">
+          <ScrollView>
+            <Text className="text-base">{response}</Text>
+          </ScrollView>
+        </View>
+      )}
+      
       {scanner && (
         <View style={{ marginTop: 20, width: "100%", alignItems: "center" }}>
           <TouchableOpacity
@@ -87,7 +163,10 @@ const BarcodeScan = () => {
               marginBottom: 12,
               width: 220,
             }}
-            onPress={() => setScanner(false)}
+            onPress={() => {
+              setScanner(false);
+              setResponse(null);
+            }}
           >
             <Text style={{ color: "white", fontWeight: "bold", fontSize: 16 }}>
               Scan Again?

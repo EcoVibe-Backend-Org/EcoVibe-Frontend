@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { View, Image, Button, StyleSheet, ActivityIndicator, Text, Alert, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import SSE from 'react-native-sse';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Make sure this is imported
 
 interface AiClassifierState {
   imageUri: string | null;
@@ -9,6 +10,10 @@ interface AiClassifierState {
   analysisResult: string;
   displayedText: string;
   typingIndex: number;
+  userId: string | null;
+  token: string | null;
+  firstName: string | null;
+  error: string | null;
 }
 
 class AiClassifier extends Component<{}, AiClassifierState> {
@@ -22,7 +27,15 @@ class AiClassifier extends Component<{}, AiClassifierState> {
       analysisResult: '',
       displayedText: '',
       typingIndex: 0,
+      userId: null,
+      token: null,
+      firstName: null,
+      error: null
     };
+  }
+
+  componentDidMount() {
+    this.getAuthData();
   }
 
   componentDidUpdate(prevProps: {}, prevState: AiClassifierState) {
@@ -44,6 +57,26 @@ class AiClassifier extends Component<{}, AiClassifierState> {
     this.cleanUpSSE();
   }
 
+  // Fetch authentication data
+  getAuthData = async () => {
+    try {
+      const userData = await AsyncStorage.getItem('userData');
+      if (userData) {
+        const parsedUserData = JSON.parse(userData);
+        this.setState({
+          token: parsedUserData.token,
+          userId: parsedUserData.id,
+          firstName: parsedUserData.firstName
+        });
+      } else {
+        this.setState({ error: 'No authentication data found' });
+      }
+    } catch (error) {
+      console.error('Error fetching auth data:', error);
+      this.setState({ error: 'Could not retrieve authentication data' });
+    }
+  };
+
   private cleanUpSSE() {
     if (this.sseInstance) {
       this.sseInstance.close();
@@ -52,6 +85,13 @@ class AiClassifier extends Component<{}, AiClassifierState> {
   }
 
   takePhoto = async () => {
+    const { userId } = this.state;
+    
+    if (!userId) {
+      Alert.alert('Authentication Required', 'Please log in to use this feature');
+      return;
+    }
+
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Permission Required', 'Camera permission is required to take photos');
@@ -71,6 +111,16 @@ class AiClassifier extends Component<{}, AiClassifierState> {
   };
 
   analyzeImage = async (base64: string) => {
+    const { userId, token } = this.state;
+    
+    if (!userId || !token) {
+      this.setState({ 
+        analysisResult: 'Authentication required. Please log in again.',
+        loading: false
+      });
+      return;
+    }
+    
     this.setState({ 
       loading: true,
       analysisResult: '',
@@ -85,9 +135,11 @@ class AiClassifier extends Component<{}, AiClassifierState> {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // Add authentication token
         },
         body: JSON.stringify({
-          imageBase64: `data:image/jpeg;base64,${base64}`
+          imageBase64: `data:image/jpeg;base64,${base64}`,
+          userId: userId // Include userId in the request
         }),
         pollingInterval: 0,
       });
@@ -136,11 +188,12 @@ class AiClassifier extends Component<{}, AiClassifierState> {
   };
 
   render() {
-    const { imageUri, loading, displayedText } = this.state;
+    const { imageUri, loading, displayedText, error } = this.state;
 
     return (
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
+          {error && <Text style={styles.errorText}>{error}</Text>}
           {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
           <Button title="Take a Photo" onPress={this.takePhoto} color="#4CAF50" />
           {loading && <ActivityIndicator size="large" color="#4CAF50" style={styles.loadingIndicator} />}
@@ -158,7 +211,7 @@ class AiClassifier extends Component<{}, AiClassifierState> {
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    paddingTop: 20, // Add top padding to match other sections
+    paddingTop: 20,
   },
   container: {
     flex: 1,
@@ -171,9 +224,9 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
     marginBottom: 20,
-    borderRadius: 15, // Apply rounded corners for consistency
+    borderRadius: 15,
     borderWidth: 2,
-    borderColor: '#ddd', // Border color for the image
+    borderColor: '#ddd',
   },
   loadingIndicator: {
     marginTop: 20,
@@ -182,8 +235,8 @@ const styles = StyleSheet.create({
     marginTop: 30,
     width: '100%',
     padding: 15,
-    backgroundColor: '#F1F1F1', // Add a background for better readability
-    borderRadius: 10, // Rounded corners for the result box
+    backgroundColor: '#F1F1F1',
+    borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -194,6 +247,11 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     color: '#333',
   },
+  errorText: {
+    color: 'red',
+    marginBottom: 15,
+    textAlign: 'center',
+  }
 });
 
 export default AiClassifier;
