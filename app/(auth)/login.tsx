@@ -63,7 +63,7 @@ const Login: React.FC = () => {
         console.log('success');
         router.push('../home');
         AsyncStorage.setItem('userData', JSON.stringify(response.data));
-        navigation.navigate('Home' as never);
+        // navigation.navigate('Home' as never);
       } catch (error: any) {
         const errorMessage = error.response?.data || 'Login failed. Please check your credentials.';
         Alert.alert('Login Failed', errorMessage);

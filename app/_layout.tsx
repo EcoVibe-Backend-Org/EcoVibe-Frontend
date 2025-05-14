@@ -11,5 +11,7 @@ export default function RootLayout() {
       name="(auth)"
       options={{headerShown: false}}
     />  
+    <Stack.Screen name="search" options={{ title: 'Search' }} />
+    <Stack.Screen name="leaderboards" options={{ title: 'Leaderboards' }} />
   </Stack>
 }
