@@ -543,7 +543,6 @@ const CommunityMapScreen = () => {
                   placeholderTextColor="#CCC"
                   value={locationDescription} // Use state variable for value
                   onChangeText={(text) => setLocationDescription(text)} // Update state on input change
-                  multiline
                   numberOfLines={4}
                   textAlignVertical="top"
                   className="h-[90px] border border-gray-300 rounded-lg px-3 py-2 text-[16px]"
